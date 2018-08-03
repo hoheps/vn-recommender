@@ -24,16 +24,21 @@ class VndbConnection():
         output: [(userid, vnid, vote),...]
         """
         #the 'more' flag in the json refers to whether there are more results or not. I set my results at 50 to minimize this (since there is a limit on api requests).
-        i = 1
-        votelist_json = self.get_votelist_json(i)
+        page_number = 1
+        votelist_json = self.get_votelist_json(page_number)
         first = [tuple([elements[1] for elements in sorted(row.items(),key=lambda row: row[0])][1:]) for row in votelist_json['items']]
         while votelist_json['more']:
-            i += 1
-            votelist_json = self.get_votelist_json(i)
+            page_number += 1
+            votelist_json = self.get_votelist_json(page_number)
             first += [tuple([elements[1] for elements in sorted(row.items(),key=lambda row: row[0])][1:]) for row in votelist_json['items']]
         return first 
 
     def get_votelist_json(page=1):
+        """
+        you should only call get_user_votes
+        input: int page
+        output: json object of votes
+        """
         json_flag = json.dumps({"results":50, "page":page})
         self.s.sendall(bytes('get votelist basic (uid={}) {} \x04'.format(uid, json_flag),"utf-8")) 
         rtn = s.recv(1024)
