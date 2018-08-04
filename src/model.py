@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import surprise
-from api import VNConnection
+from api import VndbConnection
 class VNModel():
     def __init__():
         df = pd.read_csv('../data/votes2', sep=' ', names=['VN_id', 'user_id', 'vote', 'date'])
@@ -31,7 +31,7 @@ class VNModel():
             top_pred = sorted(self.model.test(anti_test), key=lambda x: -x.est)[:10]
             return [x.iid for x in top_pred]
         else:
-            vnc = VNConnection()
+            vnc = VndbConnection()
             if vnc.is_valid():
                votes = pd.DataFrame(vnc.get_user_votes(ruid),columns=['user_id', 'VN_id', 'vote'])
                votes = votes[votes['VN_id'].isin(self.ser.keys()[self.ser])][votes[votes['VN_id'].isin(self.ser.keys()[self.ser])]['user_id'].isin(self.user_ser.keys()[self.user_ser])]
