@@ -2,7 +2,7 @@ import json
 import socket
 class VndbConnection():
 
-    def __init__():
+    def __init__(self):
         endpoint = ("api.vndb.org", 19534)
         self.s = socket.socket()
         self.s.connect(endpoint)
@@ -12,13 +12,13 @@ class VndbConnection():
         self.s.sendall(cmd)
         self.rtn = self.s.recv(1024)
 
-    def is_valid():
+    def is_valid(self):
         """
         only to be run after init
         """
         return self.rtn == b'ok\x04'
 
-    def get_user_votes(uid):
+    def get_user_votes(self,uid):
         """
         input: user id
         output: [(userid, vnid, vote),...]
@@ -33,7 +33,7 @@ class VndbConnection():
             first += [tuple([elements[1] for elements in sorted(row.items(),key=lambda row: row[0])][1:]) for row in votelist_json['items']]
         return first 
 
-    def get_votelist_json(page=1):
+    def get_votelist_json(self,page=1):
         """
         you should only call get_user_votes
         input: int page

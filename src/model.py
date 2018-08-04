@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import surprise
 from api import VndbConnection
 class VNModel():
-    def __init__():
+    def __init__(self):
         df = pd.read_csv('../data/votes2', sep=' ', names=['VN_id', 'user_id', 'vote', 'date'])
         self.user_ser = (df.groupby('user_id').count()[['VN_id']]['VN_id']>15)
         self.ser = (df.groupby('VN_id').count()[['user_id']]['user_id']>20)
@@ -17,9 +17,9 @@ class VNModel():
         self.reader = surprise.Reader(rating_scale=(10,100))
         data = surprise.dataset.Dataset.load_from_df(self.high_user_votes_df[['user_id', 'VN_id', 'vote']], self.reader)
         self.trainset = data.build_full_trainset()
-    def load_model():
+    def load_model(self):
         self.model = surprise.dump.load('./model.p')
-    def top_predictions(ruid): #raw user id
+    def top_predictions(self,ruid): #raw user id
         """
         input: real userid
         output: [game1, ..., game10]
@@ -48,14 +48,14 @@ class VNModel():
                    return [1913, 92, 562, 2016, 12402, 20802, 7771, 2002, 3144, 24]#[trainset.to_raw_iid(x) for x in np.argsort(bmodel.bi)[-10:][::-1]] top predictions using a baseline model. in the future I plan to adjust this so it can take tags and add a filter function
             return None #if connection doesn't work, no results
 
-    def generate_anti_test(iuid, ruid, trainset = self.trainset):
+    def generate_anti_test(self,iuid, ruid, trainset = self.trainset):
         """
         input: userid used by model, userid real
         output: [(userid real, game1 real id, average score),...]
         """
         return [(ruid, trainset.to_raw_iid(y), trainset.global_mean) for y in trainset.all_items() if (y not in [x[0] for x in trainset.ur[iuid]])]
 
-    def main():
+    def main(self):
         data = surprise.dataset.Dataset.load_from_df(self.high_user_votes_df[['user_id', 'VN_id', 'vote']], self.reader)
         trainset = data.build_full_trainset()
         self.ccmodel.fit(trainset)
