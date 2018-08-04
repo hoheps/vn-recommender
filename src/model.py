@@ -34,7 +34,7 @@ class VNModel():
             vnc = VNConnection()
             if vnc.is_valid():
                votes = pd.DataFrame(vnc.get_user_votes(ruid),columns=['user_id', 'VN_id', 'vote'])
-               votes = votes[votes['VN_id'].isin(self.ser.keys()[self.ser]][votes[votes['VN_id'].isin(self.ser.keys()[self.ser])]['user_id'].isin(self.user_ser.keys()[self.user_ser])]
+               votes = votes[votes['VN_id'].isin(self.ser.keys()[self.ser])][votes[votes['VN_id'].isin(self.ser.keys()[self.ser])]['user_id'].isin(self.user_ser.keys()[self.user_ser])]
                # filters for just votes that are in the model as well
                df = pd.concat([self.high_user_votes_df, votes])
                data = surprise.dataset.Dataset.load_from_df(df[['user_id', 'VN_id', 'vote']], self.reader)
@@ -49,21 +49,23 @@ class VNModel():
             return None #if connection doesn't work, no results
 
     def generate_anti_test(iuid, ruid, trainset = self.trainset):
-    """
-    input: userid used by model, userid real
-    output: [(userid real, game1 real id, average score),...]
-    """
+        """
+        input: userid used by model, userid real
+        output: [(userid real, game1 real id, average score),...]
+        """
         return [(ruid, trainset.to_raw_iid(y), trainset.global_mean) for y in trainset.all_items() if (y not in [x[0] for x in trainset.ur[iuid]])]
 
-   def main():
+    def main():
         data = surprise.dataset.Dataset.load_from_df(self.high_user_votes_df[['user_id', 'VN_id', 'vote']], self.reader)
         trainset = data.build_full_trainset()
         self.ccmodel.fit(trainset)
         surprise.dump.dump('model.p',algo=model.ccmodel,verbose=True)
+"""
 if __name__ == '__main__':
     print('generating model...')
     model = VNModel()
     model.main()
+"""
     #currently, my model refits my data to the solution to that would be to manually implement the co-clustering collaborative filtering algorithm instead of using scikit-surprise, which does not have support for single value insertion (which is O(1))
     #i need to generate edge cases where if the user has no votes (send default list of recommended), or all votes (return... nothing? I suppose) as well. right now my class assumes the user has some percentage of votes.
     #other way to restructure would be to add multiprocessing to call functions as processes when needed and that'll free up the memory in the long run.
