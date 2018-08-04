@@ -20,19 +20,29 @@ class VNModel():
     def load_model():
         self.model = surprise.dump.load('./model.p')
     def top_predictions(ruid): #raw user id
+        """
+        input: real userid
+        output: [game1, ..., game10]
+        """
         if ruid in self.user_ser:
             self.load_model()
             iuid = self.trainset.to_inner_uid(ruid) #inner user id
             anti_test = self.generate_anti_test(iuid, ruid)
-            return sorted(self.model.test(anti_test), key=lambda x: -x.est)[:10]
+            top_pred = sorted(self.model.test(anti_test), key=lambda x: -x.est)[:10]
+            return [x.iid for x in top_pred]
         else:
             vnc = VNConnection()
             if vnc.is_valid():
                votes = pd.DataFrame(vnc.get_user_votes(uid),columns=['user_id', 'VN_id', 'vote'])
-               votes[votes['VN_id'].isin(self.ser.keys()[self.ser]]
+               votes = votes[votes['VN_id'].isin(self.ser.keys()[self.ser]][votes[votes['VN_id'].isin(self.ser.keys()[self.ser])]['user_id'].isin(self.user_ser.keys()[self.user_ser])]
+               # filters for just votes that are in the model as well
+               df = pd.concat([self.high_user_votes_df, votes])
+               data = surprise.dataset.Dataset.load_from_df(df[['user_id', 'VN_id', 'vote']], self.reader)
+               trainset = data.build_full_trainset()
+               self.ccmodel.fit(trainset)
+
                if votes.empty:
-                   return top prediction
-                   (sort by baseline indexes and get score)
+                   return [1913, 92, 562, 2016, 12402, 20802, 7771, 2002, 3144, 24]#[trainset.to_raw_iid(x) for x in np.argsort(bmodel.bi)[-10:][::-1]] top predictions using a baseline model. in the future I plan to adjust this so it can take tags and add a filter function
             return None #if connection doesn't work, no results
 
     def generate_anti_test(iuid, ruid):
@@ -42,15 +52,7 @@ class VNModel():
     """
         return [(ruid, self.trainset.to_raw_iid(y), self.trainset.global_mean) for y in self.trainset.all_items() if (y not in [x[0] for x in self.trainset.ur[iuid]])]
 
-    def build_test_set_from_api():
-        if item in model:
-            [not in list]
-        if item not in model:
-            filter out results
-            pd.DataFrame([(3,2,1),(5,4,6)],columns=['user_id', 'VN_id', 'vote'])
-            pd.concat([df,above])
-            [not in list]
-    def main():
+   def main():
         data = surprise.dataset.Dataset.load_from_df(self.high_user_votes_df[['user_id', 'VN_id', 'vote']], self.reader)
         trainset = data.build_full_trainset()
         self.ccmodel.fit(trainset)
