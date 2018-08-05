@@ -3,19 +3,25 @@ import socket
 class VndbConnection():
 
     def __init__(self):
-        endpoint = ("api.vndb.org", 19534)
-        self.s = socket.socket()
-        self.s.connect(endpoint)
+        self.endpoint = ("api.vndb.org", 19534)
         q = {"protocol":1,"client":"vn recommender","clientver":0.1}
         qe = json.dumps(q)
-        cmd = bytes("{} {}\x04".format('login', qe), "utf-8")
-        self.s.sendall(cmd)
+        self.cmd = bytes("{} {}\x04".format('login', qe), "utf-8")
+        self.connect()
+
+    def connect(self):
+        self.s = socket.socket()
+        self.s.connect(self.endpoint)
+        self.s.sendall(self.cmd)
         self.rtn = self.s.recv(1024)
 
     def is_valid(self):
         """
-        only to be run after init
+        only to be run after connect
+        if it's not valid it is made valid
         """
+        if self.rtn != b'ok\x04':
+            self.connect()
         return self.rtn == b'ok\x04'
 
     def get_user_votes(self,uid):
@@ -24,16 +30,18 @@ class VndbConnection():
         output: [(userid, vnid, vote),...]
         """
         #the 'more' flag in the json refers to whether there are more results or not. I set my results at 50 to minimize this (since there is a limit on api requests).
-        page_number = 1
-        votelist_json = self.get_votelist_json(page_number)
-        first = [tuple([elements[1] for elements in sorted(row.items(),key=lambda row: row[0])][1:]) for row in votelist_json['items']]
-        while votelist_json['more']:
-            page_number += 1
-            votelist_json = self.get_votelist_json(page_number)
-            first += [tuple([elements[1] for elements in sorted(row.items(),key=lambda row: row[0])][1:]) for row in votelist_json['items']]
-        return first 
+        if self.is_valid():
+            page_number = 1
+            votelist_json = self.get_votelist_json(uid,page_number)
+            first = [tuple([elements[1] for elements in sorted(row.items(),key=lambda row: row[0])][1:]) for row in votelist_json['items']]
+            while votelist_json['more']:
+                page_number += 1
+                votelist_json = self.get_votelist_json(uid,page_number)
+                first += [tuple([elements[1] for elements in sorted(row.items(),key=lambda row: row[0])][1:]) for row in votelist_json['items']]
+            return first 
+        return None
 
-    def get_votelist_json(self,page=1):
+    def get_votelist_json(self,uid,page=1):
         """
         you should only call get_user_votes
         input: int page
@@ -41,7 +49,13 @@ class VndbConnection():
         """
         json_flag = json.dumps({"results":50, "page":page})
         self.s.sendall(bytes('get votelist basic (uid={}) {} \x04'.format(uid, json_flag),"utf-8")) 
-        rtn = s.recv(1024)
+        rtn = self.s.recv(2048)
         string = rtn.decode('utf-8')[8:-1]
-        return json.loads(string)
+        print(string)
+        json_obj = json.loads(string)
+        if not json_obj['more']:
+            self.s.close()
+            self.rtn = 'not connected'
+        return json_obj
 
+#in the future, i need to plan more around tests. adding tests for things like whether the page continuing works
