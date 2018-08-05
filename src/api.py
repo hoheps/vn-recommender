@@ -47,11 +47,10 @@ class VndbConnection():
         input: int page
         output: json object of votes
         """
-        json_flag = json.dumps({"results":50, "page":page})
+        json_flag = json.dumps({"results":20, "page":page})
         self.s.sendall(bytes('get votelist basic (uid={}) {} \x04'.format(uid, json_flag),"utf-8")) 
         rtn = self.s.recv(2048)
         string = rtn.decode('utf-8')[8:-1]
-        print(string)
         json_obj = json.loads(string)
         if not json_obj['more']:
             self.s.close()
