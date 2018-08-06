@@ -57,6 +57,7 @@ class VndbConnection():
         rtn = self.s.recv(2048)
         string = rtn.decode('utf-8')[8:-1]
         json_obj = json.loads(string)
+        #try json.load(rtn)
         if not json_obj['more']:
             self.s.close()
             self.rtn = 'not connected'
