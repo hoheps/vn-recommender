@@ -13,11 +13,11 @@ Initially, I found that the sparsity of the vote dataset was very high, in the r
 I divided the category of users into mainly 2 categories and 3 subcategories of both. Users who were in the dataset with no/some/all votes and users who were not in the dataset with no/some/all votes.
 - Users in the dataset:
   - No items voted - this person would not be in the dataset
-  - Some items voted - likely
+  - Some items voted - likely.
   - Everything voted - there isn't anything to predict to someone who's watched everything.
 - Users not in the dataset:
-  - No items voted - somewhat likely
-  - Some items voted - most likely
+  - No items voted - somewhat likely. For these users, I just returned the top 10 games based on average item ranking.
+  - Some items voted - most likely.
   - Everything voted - this person would be in the dataset
 
 To create the predictions for the data, I decided to use co-clustering collaborative filtering, which is a combination of item-to-item as well as user-to-user clustering, creating a user-cluster to item-cluster system. I used the scikit-surprise implementation of co-clustering CF.
