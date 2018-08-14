@@ -8,7 +8,8 @@ import inspect
 class VNModel():
     def __init__(self):
         module_dir = inspect.getfile(inspect.currentframe())
-        vote2_dir = "/".join(module_dir.split('/')[:-1])+'/data/votes2'
+        self.base_dir = "/".join(module_dir.split('/')[:-2])
+        vote2_dir = self.base_dir + '/data/votes2'
         df = pd.read_csv(vote2_dir, sep=' ',
                          names=['VN_id', 'user_id', 'vote', 'date'])
         self.user_ser = (df.groupby('user_id').count()
@@ -23,13 +24,14 @@ class VNModel():
         # coclustering was chosen because of the tradeoffs of speed and useful predictions it could bring.
         # the clusters above were determined through cross-validation
         self.reader = surprise.Reader(rating_scale=(10, 100))
+        #change this in future, deprecated
         data = surprise.dataset.Dataset.load_from_df(
             self.high_user_votes_df[['user_id', 'VN_id', 'vote']], self.reader)
         self.trainset = data.build_full_trainset()
         self.vnc = VndbConnection()
 
     def load_model(self):
-        self.model = surprise.dump.load('./model.p')[1]  # why is this a tuple?
+        self.model = surprise.dump.load(self.base_dir+'/src/model.p')[1]  # why is this a tuple?
 
     def top_predictions(self, ruid):  # raw user id
         """
@@ -43,7 +45,7 @@ class VNModel():
             anti_test = self.generate_anti_test(iuid, ruid, self.trainset)
             top_pred = sorted(self.model.test(anti_test),
                               key=lambda x: -x.est)[:10]
-            return [x.iid for x in top_pred]
+            return [int(x.iid) for x in top_pred]
         else:
             if self.vnc.is_valid():
                 votes = pd.DataFrame(self.vnc.get_user_votes(
@@ -61,9 +63,9 @@ class VNModel():
                 self.ccmodel.fit(trainset)
                 iuid = trainset.to_inner_uid(ruid)
                 anti_test = self.generate_anti_test(iuid, ruid, trainset)
-                top_pred = sorted(self.model.test(anti_test),
+                top_pred = sorted(self.ccmodel.test(anti_test),
                                   key=lambda x: -x.est)[:10]
-                return [x.iid for x in top_pred]
+                return [int(x.iid) for x in top_pred]
             return None  # if connection doesn't work, no results
 
     def generate_anti_test(self, iuid, ruid, trainset):
