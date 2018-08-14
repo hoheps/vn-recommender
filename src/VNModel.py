@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import surprise
-from api import VndbConnection
+from .VndbConnection import VndbConnection
 
 
 class VNModel():
