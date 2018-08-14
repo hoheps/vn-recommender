@@ -3,11 +3,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import surprise
 from .VndbConnection import VndbConnection
-
+import inspect
 
 class VNModel():
     def __init__(self):
-        df = pd.read_csv('../data/votes2', sep=' ',
+        module_dir = inspect.getfile(inspect.currentframe())
+        vote2_dir = "/".join(module_dir.split('/')[:-1])+'/data/votes2'
+        df = pd.read_csv(vote2_dir, sep=' ',
                          names=['VN_id', 'user_id', 'vote', 'date'])
         self.user_ser = (df.groupby('user_id').count()
                          [['VN_id']]['VN_id'] > 15)
