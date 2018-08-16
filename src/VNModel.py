@@ -69,7 +69,6 @@ class VNModel():
             return None  # if connection doesn't work, no results
 
     def convert_to_name(self, list_ids):
-        print(list_ids)
         return self.vnc.convert_to_name(list_ids)
         #rewrite
 
