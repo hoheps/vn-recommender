@@ -67,10 +67,12 @@ class VndbConnection():
         if self.is_valid():
             self.s.sendall(bytes('get vn basic (id={})\x04'.format(list_ids),"utf-8"))
             rtn = self.s.recv(2048)
+            rtn += self.s.recv(2048)
+            #not sure why, but 3 hrs until presentations
             string = rtn.decode('utf-8')[8:-1]
             json_obj = json.loads(string)
             #should have abstracted this code already
-            dic = {x['id']: x['title'] for x in jsons['items']}
+            dic = {x['id']: x['title'] for x in json_obj['items']}
             self.s.close()
             self.rtn = 'not connected'
             return [dic[x] for x in list_ids]
