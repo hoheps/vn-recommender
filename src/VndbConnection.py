@@ -63,7 +63,7 @@ class VndbConnection():
             self.rtn = 'not connected'
         return json_obj
 
-    def convert_to_name(list_ids):
+    def convert_to_name(self, list_ids):
         if self.isvalid():
             self.s.sendall(bytes('get vn basic (id={})\x04'.format(list_ids),"utf-8"))
             rtn = self.s.recv(2048)

@@ -68,7 +68,7 @@ class VNModel():
                 return [int(x.iid) for x in top_pred]
             return None  # if connection doesn't work, no results
 
-    def convert_to_name(list_ids):
+    def convert_to_name(self, list_ids):
         return self.vnc.convert_to_name(list_ids)
         #rewrite
 
