@@ -68,6 +68,10 @@ class VNModel():
                 return [int(x.iid) for x in top_pred]
             return None  # if connection doesn't work, no results
 
+    def convert_to_name(list_ids):
+        return self.vnc.convert_to_name(list_ids)
+        #rewrite
+
     def generate_anti_test(self, iuid, ruid, trainset):
         """
         input: userid used by model, userid real
