@@ -63,4 +63,17 @@ class VndbConnection():
             self.rtn = 'not connected'
         return json_obj
 
+    def convert_to_name(list_ids):
+        if self.isvalid():
+            self.s.sendall(bytes('get vn basic (id={})\x04'.format(list_ids),"utf-8"))
+            rtn = self.s.recv(2048)
+            string = rtn.decode('utf-8')[8:-1]
+            json_obj = json.loads(string)
+            #should have abstracted this code already
+            dic = {x['id']: x['title'] for x in jsons['items']}
+            self.s.close()
+            self.rtn = 'not connected'
+            return [dic[x] for x in list_ids]
+
+
 # in the future, i need to plan more around tests. adding tests for things like whether the page continuing works
